@@ -3,8 +3,8 @@
 HrOne is a comprehensive HR Management System built using **Flask**, **SQLite**, and **Flask-SocketIO** for real-time interaction. It helps organizations streamline leaves tracking, tasks management, meeting coordination, and internal communications.
 
 ---
-# Application video demo
-```https://drive.google.com/drive/folders/1AF4B6WhgpK8CO_JXtFbgbyNwKeFBSkp2```
+🎥 **Application Demo:** [Watch Demo Video](https://drive.google.com/drive/folders/1AF4B6WhgpK8CO_JXtFbgbyNwKeFBSkp2)
+
 ## 📁 Project Structure
 
 Here is an overview of the project structure:
