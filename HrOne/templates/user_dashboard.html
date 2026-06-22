@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | HrOne{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Welcome Header -->
+    <div class="p-4 rounded-4 mb-4 text-white shadow-sm" style="background: linear-gradient(135deg, #0f766e, #0d9488);">
+        <h2 class="fw-bold mb-1">Welcome back, {{ user.username }}!</h2>
+        <p class="mb-0 opacity-75 small">Role: {{ user.role }} • Email: {{ user.email }}</p>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="row g-4 mb-5">
+        <!-- Leaves -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 ps-4 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="fas fa-calendar-alt text-teal me-2" style="color: #0f766e;"></i>My Leaves</span>
+                    <i class="fas fa-arrow-right text-muted small"></i>
+                </div>
+                <div class="card-body px-4 pt-0">
+                    {% if leaves %}
+                    <div class="list-group list-group-flush mb-3">
+                        {% for leave in leaves[:3] %}
+                        <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fw-semibold d-block text-dark">{{ leave.leave_type }}</span>
+                                <small class="text-muted">{{ leave.start_date }} to {{ leave.end_date }}</small>
+                            </div>
+                            <span class="badge status-badge status-{{ leave.status|lower }}">{{ leave.status }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted py-3">No leave requests found.</p>
+                    {% endif %}
+                    <a href="{{ url_for('leaves') }}" class="btn btn-teal w-100 mt-2" style="background-color: #0f766e; color: #fff;">
+                        <i class="fas fa-plus me-1"></i> Request Leave
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tasks -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 ps-4 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="fas fa-tasks text-indigo me-2" style="color: #4f46e5;"></i>My Tasks</span>
+                    <i class="fas fa-arrow-right text-muted small"></i>
+                </div>
+                <div class="card-body px-4 pt-0">
+                    {% if tasks %}
+                    <div class="list-group list-group-flush mb-3">
+                        {% for task in tasks[:3] %}
+                        <div class="list-group-item px-0 py-3">
+                            <span class="fw-semibold d-block text-dark">{{ task.title }}</span>
+                            <div class="d-flex justify-content-between align-items-center mt-1">
+                                <small class="text-muted">Due: {{ task.due_date }}</small>
+                                <span class="badge bg-light text-dark border">{{ task.status }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted py-3">No active tasks assigned.</p>
+                    {% endif %}
+                    <a href="{{ url_for('tasks') }}" class="btn btn-indigo w-100 mt-2" style="background-color: #4f46e5; color: #fff;">
+                        <i class="fas fa-clipboard-list me-1"></i> View Workspace
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Meetings -->
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3 ps-4 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-dark"><i class="fas fa-video text-success me-2" style="color: #10b981;"></i>Upcoming Meetings</span>
+                    <i class="fas fa-arrow-right text-muted small"></i>
+                </div>
+                <div class="card-body px-4 pt-0">
+                    {% if meetings %}
+                    <div class="list-group list-group-flush mb-3">
+                        {% for m in meetings[:3] %}
+                        <div class="list-group-item px-0 py-3">
+                            <span class="fw-semibold d-block text-dark">{{ m.title }}</span>
+                            <small class="text-muted d-block"><i class="fas fa-clock me-1"></i>{{ m.meeting_date }} at {{ m.meeting_time }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted py-3">No upcoming meetings scheduled.</p>
+                    {% endif %}
+                    <a href="{{ url_for('meetings') }}" class="btn btn-success w-100 mt-2">
+                        <i class="fas fa-calendar-plus me-1"></i> Schedule / Join
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Management -->
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header border-0 bg-light py-3">
+                    <i class="fas fa-user-edit text-teal me-2" style="color: #0f766e;"></i><span class="fw-bold text-dark">Update Contact Info</span>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('user_update') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Email Address</label>
+                            <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-teal px-4" style="background-color: #0f766e; color: #fff;">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header border-0 bg-light py-3">
+                    <i class="fas fa-key text-teal me-2" style="color: #0f766e;"></i><span class="fw-bold text-dark">Change Password</span>
+                </div>
+                <div class="card-body p-4">
+                    <form action="{{ url_for('user_reset_password') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">New Password</label>
+                            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-teal px-4" style="background-color: #0f766e; color: #fff;">
+                            <i class="fas fa-lock me-1"></i> Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

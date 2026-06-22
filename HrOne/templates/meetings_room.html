@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Meeting Room - {{ meeting.title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    #messages {
+        height: 480px;
+        overflow-y: auto;
+        background-color: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+    .message-bubble {
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        max-width: 75%;
+    }
+    .message-bubble.me {
+        margin-left: auto;
+        flex-direction: row-reverse;
+    }
+    .chat-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        color: white;
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .message-content-wrapper {
+        margin: 0 10px;
+    }
+    .message-bubble.me .message-content-wrapper {
+        text-align: right;
+    }
+    .message-bubble-body {
+        padding: 0.85rem 1.15rem;
+        border-radius: 16px;
+        background-color: #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        color: #334155;
+        display: inline-block;
+        text-align: left;
+        border: 1px solid #e2e8f0;
+    }
+    .message-bubble.me .message-bubble-body {
+        background: linear-gradient(135deg, #0f766e, #0d9488);
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 10px rgba(13, 148, 136, 0.2);
+    }
+    .message-meta {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 4px;
+        display: block;
+    }
+    .status-msg {
+        text-align: center;
+        margin: 1rem 0;
+        font-size: 0.8rem;
+        color: #94a3b8;
+        font-style: italic;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 16px;">
+        <div class="card-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center">
+            <span class="fw-bold d-flex align-items-center">
+                <i class="fas fa-circle text-success me-2 blink"></i>
+                <i class="fas fa-video text-teal me-2" style="color: #10b981;"></i>
+                {{ meeting.title }}
+            </span>
+            <span class="badge bg-light text-dark fw-semibold small">
+                <i class="far fa-clock me-1"></i>{{ meeting.meeting_date }} at {{ meeting.meeting_time }}
+            </span>
+        </div>
+        
+        <div class="card-body p-4 bg-white">
+            <div id="messages">
+                {% for msg in messages %}
+                <div class="message-bubble {% if msg.username == session.username %}me{% endif %}">
+                    <div class="chat-avatar {% if msg.username == session.username %}bg-teal{% else %}bg-primary{% endif %}" style="background-color: {% if msg.username == session.username %}#0d9488{% else %}#4f46e5{% endif %};">
+                        {{ msg.username[:2]|upper }}
+                    </div>
+                    <div class="message-content-wrapper">
+                        <div class="message-bubble-body">
+                            <strong class="d-block small mb-1 opacity-75">{{ msg.username }}</strong>
+                            <span>{{ msg.message }}</span>
+                        </div>
+                        <span class="message-meta">{{ msg.timestamp }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="input-group mt-3">
+                <input type="text" id="messageInput" class="form-control border-end-0 py-3 ps-3" placeholder="Type a message to participants..." style="border-radius: 12px 0 0 12px;">
+                <button onclick="sendMessage()" class="btn btn-teal px-4" style="background-color: #0f766e; color: #fff; border-radius: 0 12px 12px 0;">
+                    <i class="fas fa-paper-plane me-1"></i> Send
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.min.js"></script>
+<script>
+    const socket = io();
+    const room = {{ meeting.id }};
+    const currentUsername = "{{ session.username }}";
+    
+    // Auto-scroll to bottom of chat
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    
+    socket.emit('join', {room: room});
+    
+    socket.on('status', function(data) {
+        const statusDiv = document.createElement('div');
+        statusDiv.className = 'status-msg';
+        statusDiv.innerHTML = `<i class="fas fa-info-circle me-1"></i> ${data.msg}`;
+        messagesDiv.appendChild(statusDiv);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+    
+    socket.on('message', function(data) {
+        const isMe = data.username === currentUsername;
+        const bubble = document.createElement('div');
+        bubble.className = `message-bubble ${isMe ? 'me' : ''}`;
+        
+        const avatarBg = isMe ? '#0d9488' : '#4f46e5';
+        
+        bubble.innerHTML = `
+            <div class="chat-avatar" style="background-color: ${avatarBg};">
+                ${data.username.substring(0, 2).toUpperCase()}
+            </div>
+            <div class="message-content-wrapper">
+                <div class="message-bubble-body">
+                    <strong class="d-block small mb-1 opacity-75">${data.username}</strong>
+                    <span>${data.message}</span>
+                </div>
+                <span class="message-meta">${data.timestamp}</span>
+            </div>
+        `;
+        messagesDiv.appendChild(bubble);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+    
+    function sendMessage() {
+        const input = document.getElementById('messageInput');
+        if (input.value.trim()) {
+            socket.emit('message', {room: room, message: input.value});
+            input.value = '';
+        }
+    }
+    
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendMessage();
+    });
+</script>
+
+<style>
+.blink {
+    animation: blinker 1.5s linear infinite;
+}
+@keyframes blinker {
+    50% { opacity: 0; }
+}
+</style>
+{% endblock %}
+

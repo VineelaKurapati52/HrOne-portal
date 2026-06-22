@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Meetings | HrOne{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-dark">
+            <i class="fas fa-video text-teal me-2" style="color: #0f766e;"></i>Meeting Center
+        </h2>
+        <span class="badge bg-teal px-3 py-2 rounded-pill small" style="background-color: #0f766e;">Collaborative Workspaces</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Schedule Form -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header border-0 bg-teal text-white py-3 ps-4" style="background-color: #0f766e;">
+                    <i class="fas fa-calendar-plus me-2"></i>Create New Meeting
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Meeting Title</label>
+                            {{ form.title(class="form-control", placeholder="e.g. Weekly Sync") }}
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label text-secondary small fw-semibold">Date</label>
+                                {{ form.meeting_date(class="form-control", type="date") }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label text-secondary small fw-semibold">Time</label>
+                                {{ form.meeting_time(class="form-control", type="time") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Description</label>
+                            {{ form.description(class="form-control", rows="3", placeholder="Outline agenda or goals...") }}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small fw-semibold">Participants (comma separated usernames)</label>
+                            {{ form.participants(class="form-control", placeholder="e.g. admin,user,manager") }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-teal w-100 py-2.5" style="background-color: #0f766e; color: #fff;">
+                            <i class="fas fa-video me-1"></i> Schedule Meeting
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming meetings list -->
+        <div class="col-lg-7">
+            <h4 class="fw-bold mb-3 text-dark">Upcoming Meetings</h4>
+            <div class="row g-3">
+                {% for meeting in meetings %}
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm card-hover-effect">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="fw-bold text-dark mb-1">{{ meeting['title'] }}</h5>
+                                    <span class="badge bg-light text-secondary border">
+                                        <i class="far fa-calendar-alt me-1"></i>{{ meeting['meeting_date'] }}
+                                        <i class="far fa-clock ms-2 me-1"></i>{{ meeting['meeting_time'] }}
+                                    </span>
+                                </div>
+                                <span class="badge bg-teal-subtle text-teal px-2 py-1 small rounded-pill" style="background-color: rgba(13, 148, 136, 0.1); color: #0d9488;">Scheduled</span>
+                            </div>
+                            
+                            <p class="text-muted small mb-3">{{ meeting['description'] }}</p>
+                            
+                            <div class="border-top pt-3 d-flex justify-content-between align-items-center">
+                                <div class="small text-secondary">
+                                    <i class="fas fa-users me-1"></i>
+                                    <span class="fw-semibold">{{ meeting['participants'] }}</span>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('meetings_room', meeting_id=meeting['id']) }}" class="btn btn-sm btn-success px-3 rounded-pill">
+                                        <i class="fas fa-sign-in-alt me-1"></i> Join Room
+                                    </a>
+                                    
+                                    {% if session.role == 'Admin' %}
+                                    <form method="POST" style="display:inline;" onsubmit="return confirm('Delete this meeting?')">
+                                        <input type="hidden" name="delete_meeting" value="{{ meeting['id'] }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger px-3 rounded-pill">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <div class="text-center py-5 bg-white rounded-4 shadow-sm text-muted">
+                        <i class="fas fa-video-slash fa-3x mb-3 text-secondary"></i>
+                        <p class="mb-0">No upcoming meetings scheduled.</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-hover-effect {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover-effect:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important;
+}
+</style>
+{% endblock %}

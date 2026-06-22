@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact HR Admin | HrOne{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
+                <div class="card-header border-0 bg-teal text-white text-center py-4" style="background: linear-gradient(135deg, #0f766e, #0d9488);">
+                    <i class="fas fa-paper-plane fa-2x mb-2 text-light"></i>
+                    <h3 class="fw-bold mb-0">Contact HR Admin</h3>
+                    <p class="text-white-50 small mb-0">Submit messages, alerts, or upload files directly to administration</p>
+                </div>
+                
+                <div class="card-body p-5 bg-white">
+                    <form method="POST" enctype="multipart/form-data" class="row g-3">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Your Name</label>
+                            {{ form.name(class="form-control", placeholder="John Doe") }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-semibold">Email Address</label>
+                            {{ form.email(class="form-control", placeholder="john@example.com") }}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-semibold">Subject</label>
+                            {{ form.subject(class="form-control", placeholder="How can we help you?") }}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-semibold">Message</label>
+                            {{ form.message(class="form-control", rows=4, placeholder="Type your detailed message here...") }}
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label text-secondary small fw-semibold">Attachment (Optional, Max 100MB)</label>
+                            {{ form.attachment(class="form-control") }}
+                            <div class="form-text text-muted small"><i class="fas fa-info-circle me-1"></i>Large uploads >20MB will be stored in server workspace directory.</div>
+                        </div>
+                        
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-teal w-100 py-3" style="background-color: #0f766e; color: #fff; font-size: 1.05rem;">
+                                <i class="fas fa-paper-plane me-1"></i> Send Secure Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

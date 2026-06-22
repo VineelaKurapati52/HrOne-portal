@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Leave Workspace | HrOne{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold mb-0 text-dark">
+            <i class="fas fa-calendar-alt text-teal me-2" style="color: #0f766e;"></i>Leave Management
+        </h2>
+        <span class="badge bg-teal px-3 py-2 rounded-pill small" style="background-color: #0f766e;">Leave Workspace</span>
+    </div>
+
+    <div class="row g-4">
+        <!-- Apply form -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-teal text-white py-3 ps-4" style="background-color: #0f766e;">
+                    <i class="fas fa-edit me-2"></i>Apply for Leave
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-3">
+                            <label class="form-label text-secondary small fw-semibold">Leave Type</label>
+                            {{ form.leave_type(class="form-select") }}
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-secondary small fw-semibold">Start Date</label>
+                                {{ form.start_date(class="form-control", type="date") }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-secondary small fw-semibold">End Date</label>
+                                {{ form.end_date(class="form-control", type="date") }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small fw-semibold">Reason</label>
+                            {{ form.reason(class="form-control", rows="3", placeholder="Brief explanation of your leave request...") }}
+                        </div>
+                        
+                        <button type="submit" class="btn btn-teal w-100 py-2.5" style="background-color: #0f766e; color: #fff;">
+                            <i class="fas fa-paper-plane me-1"></i> Submit Leave Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leave list -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header border-0 bg-dark text-white py-3 ps-4">
+                    <i class="fas fa-list me-2 text-teal" style="color: #10b981;"></i>All Leave Requests
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Employee</th>
+                                    <th>Type</th>
+                                    <th>Dates</th>
+                                    <th>Status</th>
+                                    {% if session.role == 'Admin' %}
+                                    <th class="text-end pe-4">Actions</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leave in leaves %}
+                                <tr>
+                                    <td class="ps-4 fw-semibold text-dark">{{ leave.employee_name }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">{{ leave.leave_type }}</span>
+                                    </td>
+                                    <td class="small text-muted">{{ leave.start_date }} to {{ leave.end_date }}</td>
+                                    <td>
+                                        <span class="badge status-badge status-{{ leave.status|lower }}">{{ leave.status }}</span>
+                                    </td>
+                                    {% if session.role == 'Admin' %}
+                                    <td class="text-end pe-4">
+                                        {% if leave.status == 'Pending' %}
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{{ url_for('approve_leave', leave_id=leave.id) }}" class="btn btn-sm btn-success px-3 rounded-pill">
+                                                <i class="fas fa-check me-1"></i>Approve
+                                            </a>
+                                            <a href="{{ url_for('reject_leave', leave_id=leave.id) }}" class="btn btn-sm btn-danger px-3 rounded-pill">
+                                                <i class="fas fa-times me-1"></i>Reject
+                                            </a>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted small">Processed</span>
+                                        {% endif %}
+                                    </td>
+                                    {% endif %}
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <i class="fas fa-calendar-times fa-3x mb-3 text-secondary"></i>
+                                        <p class="mb-0">No leave requests found.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

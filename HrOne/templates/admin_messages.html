@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 d-flex align-items-center justify-content-between">
+        <span>
+            <i class="fas fa-bell text-warning me-2"></i>Contact Messages
+        </span>
+        <span class="fs-6 fw-normal text-muted">Showing only unread messages</span>
+    </h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Subject</th>
+                            <th>Message</th>
+                            <th>Received At</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for msg in messages %}
+                        <tr id="message-row-{{ msg['id'] }}" class="transition-row">
+                            <td class="fw-semibold text-dark">{{ msg['name'] }}</td>
+                            <td><a href="mailto:{{ msg['email'] }}" class="text-decoration-none">{{ msg['email'] }}</a></td>
+                            <td>
+                                <span class="badge {% if msg['sender_role'] == 'Admin' %}bg-danger{% elif msg['sender_role'] == 'Manager' %}bg-info{% else %}bg-primary{% endif %}">
+                                    {{ msg['sender_role'] }}
+                                </span>
+                            </td>
+                            <td class="fw-semibold">{{ msg['subject'] }}</td>
+                            <td class="text-muted">{{ msg['message'] }}</td>
+                            <td class="small text-muted">{{ msg['created_at'] }}</td>
+                            <td class="text-end">
+                                <button onclick="markAsRead({{ msg['id'] }})" class="btn btn-outline-success btn-sm rounded-pill px-3">
+                                    <i class="fas fa-check me-1"></i> Mark Read
+                                </button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 text-secondary"></i>
+                                <p class="mb-0">No new contact messages or alerts!</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .transition-row {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .fade-out {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+</style>
+
+<script>
+function markAsRead(messageId) {
+    fetch(`/admin/messages/read/${messageId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const row = document.getElementById(`message-row-${messageId}`);
+            if (row) {
+                // Apply fade out effect
+                row.classList.add('fade-out');
+                setTimeout(() => {
+                    row.remove();
+                    
+                    // Decrement navbar badge
+                    const badge = document.getElementById('unread-alert-badge');
+                    if (badge) {
+                        let currentCount = parseInt(badge.textContent.trim()) || 0;
+                        if (currentCount > 1) {
+                            badge.textContent = currentCount - 1;
+                        } else {
+                            badge.remove();
+                        }
+                    }
+                    
+                    // If no rows left, reload or show empty state
+                    const tbody = document.querySelector('tbody');
+                    if (tbody && tbody.querySelectorAll('tr:not(.fade-out)').length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-inbox fa-3x mb-3 text-secondary"></i>
+                                    <p class="mb-0">No new contact messages or alerts!</p>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                }, 400);
+            }
+        } else {
+            alert('Failed to mark message as read: ' + (data.message || 'Unknown error'));
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('An error occurred while marking as read.');
+    });
+}
+</script>
+{% endblock %}
