@@ -1,9 +1,12 @@
+# HrOne Application Demo Video Link
+https://drive.google.com/file/d/1AduldGEpKEGC4OnsQLy3mHkLLJv31tjk/view?usp=drivesdk
+
+
 # HrOne - HR Management System
 
 HrOne is a comprehensive HR Management System built using **Flask**, **SQLite**, and **Flask-SocketIO** for real-time interaction. It helps organizations streamline leaves tracking, tasks management, meeting coordination, and internal communications.
 
 ---
-🎥 **Application Demo:** [Watch Demo Video](https://drive.google.com/drive/folders/1AF4B6WhgpK8CO_JXtFbgbyNwKeFBSkp2)
 
 ## 📁 Project Structure
 
